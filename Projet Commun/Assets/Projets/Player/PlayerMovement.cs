@@ -6,12 +6,11 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float horizontalSpeed = 1f;
-    [SerializeField] private float verticalSpeed = 1f;
-    [SerializeField] private float jumpTime = 0.5f;
+    [SerializeField] private float jumpPower = 1f;
+    [SerializeField] private float gravitation = 1f;
 
 
     private bool isJump = false;
-    private float jumpTimer = 0f;
     private Rigidbody2D rb = null;
 
     // Start is called before the first frame update
@@ -39,26 +38,30 @@ public class PlayerMovement : MonoBehaviour
         if (!isJump && Input.GetKeyDown(KeyCode.Space))
         {
             isJump = true;
-            //rb.velocity = new Vector2(0f, rb.velocity.y) + Vector2.up * verticalSpeed;
-            rb.velocity += Vector2.up * verticalSpeed;
+            rb.velocity += new Vector2(0f, jumpPower);
         }
-
-        if (isJump)
+        else if (isJump)
         {
-            jumpTimer += Time.deltaTime;
-
-            if (jumpTimer >= jumpTime)
-            {
-                Debug.Log("if if");
-                jumpTimer = 0f;
-                isJump = false;
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
-            }
+            rb.velocity -= new Vector2(0f, gravitation);
         }
-    }
 
-    private void FixedUpdate()
-    {
+        int layerMask = 1 << 8;
+        layerMask = ~layerMask;
+
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, 1.1f, layerMask);
+
+        if (hit)
+        {
+            Debug.DrawRay(transform.position, -Vector2.up * hit.distance, Color.yellow);
+            Debug.Log("Hit the gameObject : " + hit.collider.name + "  AND OF COURSE DISTANCE : " + hit.distance);
+            isJump = false;
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(-Vector3.up) * 1000, Color.white);
+            Debug.Log("Did not Hit");
+        }
+
 
     }
 }
