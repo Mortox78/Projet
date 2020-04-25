@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
 
 
     private bool isJump = false;
+    private bool isFall = false;
     private Rigidbody2D rb = null;
 
     // Start is called before the first frame update
@@ -24,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.A))
         {
-            rb.velocity = new Vector2(0f, rb.velocity.y) + Vector2.left * horizontalSpeed ;
+            rb.velocity = new Vector2(0f, rb.velocity.y) + Vector2.left * horizontalSpeed;
         }
         else if (Input.GetKey(KeyCode.D))
         {
@@ -37,12 +38,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isJump && Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("START TO JUMPPPP");
             isJump = true;
             rb.velocity += new Vector2(0f, jumpPower);
         }
         else if (isJump)
         {
+            Debug.Log("IS JUMPINNNGGGG");
             rb.velocity -= new Vector2(0f, gravitation);
+            if (rb.velocity.y <= 0)
+                isFall = true;
         }
 
         int layerMask = 1 << 8;
@@ -50,18 +55,19 @@ public class PlayerMovement : MonoBehaviour
 
         RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, 1.1f, layerMask);
 
-        if (hit)
+        if (hit && isFall)
         {
             Debug.DrawRay(transform.position, -Vector2.up * hit.distance, Color.yellow);
-            Debug.Log("Hit the gameObject : " + hit.collider.name + "  AND OF COURSE DISTANCE : " + hit.distance);
+            //Debug.Log("Hit the gameObject : " + hit.collider.name + "  AND OF COURSE DISTANCE : " + hit.distance);
+            Debug.Log("STOP TO JUMP");
+            isFall = false;
             isJump = false;
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
         }
         else
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(-Vector3.up) * 1000, Color.white);
-            Debug.Log("Did not Hit");
+            //Debug.Log("Did not Hit");
         }
-
-
     }
 }
